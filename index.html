@@ -81,129 +81,112 @@
     </div>
     <script>
       function getInitialData({ rows, header }) {
-        const data = [header];
-        const columns = data[0].length;
+        const data = [header]
+        const columns = data[0].length
 
         for (let i = 0; i < rows; i++) {
-          data.push(new Array(data[0].length));
+          data.push(new Array(data[0].length))
         }
 
-        return data;
+        return data
       }
 
       function alterData(data) {
-        if (document.querySelector("#rows").value < data.length) {
-          data.length = document.querySelector("#rows").value;
+        if (document.querySelector('#rows').value < data.length) {
+          data.length = document.querySelector('#rows').value
         } else {
           for (
-            let i = data.length;
-            i < document.querySelector("#rows").value;
-            i++
-          ) {
-            data.push(new Array());
-          }
+            let i = data.length
+            ;i < document.querySelector('#rows').value
+            ;i++
+          ) { data.push(new Array()) }
         }
 
         for (let i = 0; i < data.length; i++) {
-          if (document.querySelector("#columns").value < data[i].length) {
-            data[i].length = document.querySelector("#columns").value;
+          if (document.querySelector('#columns').value < data[i].length) {
+            data[i].length = document.querySelector('#columns').value
           } else {
             for (
-              let j = data[i].length;
-              j < document.querySelector("#columns").value;
-              j++
-            ) {
-              data[i].push("");
-            }
+              let j = data[i].length
+              ;j < document.querySelector('#columns').value
+              ;j++
+            ) { data[i].push('') }
           }
         }
 
-        return data;
+        return data
       }
 
       function createDOMTable(elem, tableData) {
         while (elem.rows.length > 0) {
-          elem.deleteRow(0);
+          elem.deleteRow(0)
         }
 
         for (let i = 0; i < tableData.length; i++) {
-          let row = elem.insertRow();
+          let row = elem.insertRow()
 
           for (let j = 0; j < tableData[0].length; j++) {
-            row.insertCell().innerHTML = `<input data-row="${i}" data-column="${j}" value="${tableData[
-              i
-            ][j] || ""}"/>`;
+            row.insertCell().innerHTML = `<input data-row="${i}" data-column="${j}" value="${tableData[i][j] || ""}"/>`
           }
         }
       }
 
       function capitalizeWord(s) {
-        if (typeof s !== "string") return "";
-        return s.charAt(0).toUpperCase() + s.slice(1);
+        if (typeof s !== 'string') return ''
+        return s.charAt(0).toUpperCase() + s.slice(1)
       }
 
       window.contentfulExtension.init(extension => {
-        let value = extension.field.getValue();
+        let value = extension.field.getValue()
 
         if (!value) {
           value = {
             tableData: getInitialData({
               rows: 3,
-              header: ["Column 1", "Column 2"]
+              header: ['Column 1', 'Column 2']
             })
-          };
+          }
         }
 
-        createDOMTable(document.querySelector("table"), value.tableData);
+        createDOMTable(document.querySelector('table'), value.tableData)
 
-        let inputSizes = ["rows", "columns"];
+        let inputSizes = ['rows', 'columns']
         for (input in inputSizes) {
-          let inputContainer = document.createElement("div");
-          let inputLabel = document.createElement("label");
-          let inputEl = document.createElement("input");
-          inputEl.id = inputSizes[input];
-          inputEl.classList.add("size-input");
-          if (inputSizes[input] == "rows") {
-            inputEl.placeholder = "2";
-            inputEl.value = value.tableData.length;
+          let inputContainer = document.createElement('div')
+          let inputLabel = document.createElement('label')
+          let inputEl = document.createElement('input')
+          inputEl.id = inputSizes[input]
+          inputEl.classList.add('size-input')
+          if (inputSizes[input] === 'rows') {
+            inputEl.placeholder = '2'
+            inputEl.value = value.tableData.length
           } else {
-            inputEl.placeholder = "3";
-            inputEl.value = value.tableData[0].length;
+            inputEl.placeholder = '3'
+            inputEl.value = value.tableData[0].length
           }
-          inputEl.addEventListener(
-            "change",
-            e => {
-              value = {
-                tableData: alterData(value.tableData)
-              };
-              createDOMTable(document.querySelector("table"), value.tableData);
-              extension.window.updateHeight();
-              extension.field.setValue(value);
-            },
-            true
-          );
-          inputContainer.classList.add("input-container");
-          inputLabel.textContent = capitalizeWord(inputSizes[input]);
-          inputContainer.appendChild(inputLabel);
-          inputContainer.appendChild(inputEl);
+          inputEl.addEventListener('change', e => {
+            value = { tableData: alterData(value.tableData)}
+            createDOMTable(document.querySelector('table'), value.tableData)
+            extension.window.updateHeight()
+            extension.field.setValue(value)
+          }, true)
+          inputContainer.classList.add('input-container')
+          inputLabel.textContent = capitalizeWord(inputSizes[input])
+          inputContainer.appendChild(inputLabel)
+          inputContainer.appendChild(inputEl)
           document.body.insertBefore(
             inputContainer,
             document.body.childNodes[0]
-          );
-          extension.window.updateHeight();
+          )
+          extension.window.updateHeight()
         }
 
-        window.addEventListener(
-          "change",
-          e => {
-            if (e.target.classList.contains("size-input")) return false;
-            value.tableData[e.target.dataset.row][e.target.dataset.column] =
-              e.target.value;
-            extension.field.setValue(value);
-          },
-          true
-        );
-      });
+        window.addEventListener('change', e => {
+          if (e.target.classList.contains('size-input')) return false
+          value.tableData[e.target.dataset.row][e.target.dataset.column] = e.target.value
+          extension.field.setValue(value)
+        }, true)
+      })
     </script>
   </body>
 </html>

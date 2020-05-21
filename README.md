@@ -2,8 +2,6 @@
 
 An editable table to handle tabular data as a [Contentful UI Extension](https://www.contentful.com/developers/docs/concepts/uiextensions/).
 
-![figure](https://raw.githubusercontent.com/contentful-developer-relations/ui-editable-table/master/demo.gif "Editable table as Contentful UI Extension demo")
-
 ### Configure
 
 Create a configuration file with your credentials for Contentful.
