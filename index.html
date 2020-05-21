@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tables for Contentful UI</title>
+    <link
+      rel="stylesheet"
+      href="https://contentful.github.io/ui-extensions-sdk/cf-extension.css"
+    />
+    <script src="https://contentful.github.io/ui-extensions-sdk/cf-extension-api.js"></script>
+    <style>
+      div.input-container {
+        display: inline-block;
+        vertical-align: top;
+        width: 4rem;
+        margin: 0 1rem 1rem 0;
+      }
+      div.input-container label {
+        color: #718096;
+        display: block;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: 2px;
+      }
+      div.input-container input {
+        display: block;
+        color: #1a202c;
+        border: 1px solid #cbd5e0;
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+        padding: 0.5rem;
+        text-align: center;
+        width: 100%;
+      }
+
+      table {
+        border-collapse: collapse;
+        table-layout: auto;
+        width: 100%;
+      }
+
+      th {
+        color: #2d3748;
+        font-size: 1rem;
+        padding: 0;
+      }
+
+      td {
+        border: 1px solid #cbd5e0;
+        color: #1a202c;
+        font-size: 1rem;
+        padding: 0;
+      }
+
+      tr:first-child td input {
+        font-weight: bold;
+        text-align: center;
+      }
+
+      td input {
+        border: none;
+        color: #1a202c;
+        font-size: 1rem;
+        line-height: 1.5;
+        padding: 0.5rem 1rem;
+        text-align: center;
+        width: 100%;
+      }
+
+      input:hover {
+        background-color: #f7fafc;
+      }
+      input:focus {
+        background-color: #e2e8f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="content">
+      <table></table>
+    </div>
+    <script>
+      function getInitialData({ rows, header }) {
+        const data = [header];
+        const columns = data[0].length;
+
+        for (let i = 0; i < rows; i++) {
+          data.push(new Array(data[0].length));
+        }
+
+        return data;
+      }
+
+      function alterData(data) {
+        if (document.querySelector("#rows").value < data.length) {
+          data.length = document.querySelector("#rows").value;
+        } else {
+          for (
+            let i = data.length;
+            i < document.querySelector("#rows").value;
+            i++
+          ) {
+            data.push(new Array());
+          }
+        }
+
+        for (let i = 0; i < data.length; i++) {
+          if (document.querySelector("#columns").value < data[i].length) {
+            data[i].length = document.querySelector("#columns").value;
+          } else {
+            for (
+              let j = data[i].length;
+              j < document.querySelector("#columns").value;
+              j++
+            ) {
+              data[i].push("");
+            }
+          }
+        }
+
+        return data;
+      }
+
+      function createDOMTable(elem, tableData) {
+        while (elem.rows.length > 0) {
+          elem.deleteRow(0);
+        }
+
+        for (let i = 0; i < tableData.length; i++) {
+          let row = elem.insertRow();
+
+          for (let j = 0; j < tableData[0].length; j++) {
+            row.insertCell().innerHTML = `<input data-row="${i}" data-column="${j}" value="${tableData[
+              i
+            ][j] || ""}"/>`;
+          }
+        }
+      }
+
+      function capitalizeWord(s) {
+        if (typeof s !== "string") return "";
+        return s.charAt(0).toUpperCase() + s.slice(1);
+      }
+
+      window.contentfulExtension.init(extension => {
+        let value = extension.field.getValue();
+
+        if (!value) {
+          value = {
+            tableData: getInitialData({
+              rows: 3,
+              header: ["Column 1", "Column 2"]
+            })
+          };
+        }
+
+        createDOMTable(document.querySelector("table"), value.tableData);
+
+        let inputSizes = ["rows", "columns"];
+        for (input in inputSizes) {
+          let inputContainer = document.createElement("div");
+          let inputLabel = document.createElement("label");
+          let inputEl = document.createElement("input");
+          inputEl.id = inputSizes[input];
+          inputEl.classList.add("size-input");
+          if (inputSizes[input] == "rows") {
+            inputEl.placeholder = "2";
+            inputEl.value = value.tableData.length;
+          } else {
+            inputEl.placeholder = "3";
+            inputEl.value = value.tableData[0].length;
+          }
+          inputEl.addEventListener(
+            "change",
+            e => {
+              value = {
+                tableData: alterData(value.tableData)
+              };
+              createDOMTable(document.querySelector("table"), value.tableData);
+              extension.window.updateHeight();
+              extension.field.setValue(value);
+            },
+            true
+          );
+          inputContainer.classList.add("input-container");
+          inputLabel.textContent = capitalizeWord(inputSizes[input]);
+          inputContainer.appendChild(inputLabel);
+          inputContainer.appendChild(inputEl);
+          document.body.insertBefore(
+            inputContainer,
+            document.body.childNodes[0]
+          );
+          extension.window.updateHeight();
+        }
+
+        window.addEventListener(
+          "change",
+          e => {
+            if (e.target.classList.contains("size-input")) return false;
+            value.tableData[e.target.dataset.row][e.target.dataset.column] =
+              e.target.value;
+            extension.field.setValue(value);
+          },
+          true
+        );
+      });
+    </script>
+  </body>
+</html>
